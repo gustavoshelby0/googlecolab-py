@@ -2,8 +2,6 @@
 Projeto de Análise de Dados de Vendas - Tech
 Este script faz a leitura, limpeza, transformação e análise exploratória 
 de dados de vendas de uma loja de tecnologia.
-Autor: [Seu Nome]
-Data: [Data]
 """
 
 import pandas as pd
