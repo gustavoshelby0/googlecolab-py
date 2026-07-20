@@ -1,138 +1,155 @@
-"""
-Projeto de Análise de Dados de Vendas - Tech
-Este script faz a leitura, limpeza, transformação e análise exploratória 
-de dados de vendas de uma loja de tecnologia.
-"""
+# ====================================================================
+# PROJETO DE ANÁLISE DE DADOS - VENDAS TECH
+# ====================================================================
+# Autor: [Seu Nome]
+# Objetivo: Limpeza, tratamento e análise exploratória de vendas.
+# Status: Código 100% funcional e comentado bloco a bloco.
+# ====================================================================
 
+# %%
+# ====================================================================
+# BLOCO 1 - IMPORTAÇÃO DAS BIBLIOTECAS
+# ====================================================================
+# Aqui carregamos as ferramentas que vamos usar.
+# Pandas -> manipulação de tabelas (DataFrames)
+# Numpy -> cálculos matemáticos e vetorizados
+# ====================================================================
 import pandas as pd
 import numpy as np
 
-# ----------------------------
-# 1. LEITURA DOS DADOS
-# ----------------------------
+print("Bibliotecas importadas com sucesso!")
 
-# Leitura do arquivo CSV de vendas (com low_memory=False para evitar warnings de tipo)
+# %%
+# ====================================================================
+# BLOCO 2 - LEITURA DOS ARQUIVOS (CSV e EXCEL)
+# ====================================================================
+# low_memory=False evita warnings sobre tipos mistos no CSV.
+# ====================================================================
 df_vendas = pd.read_csv('vendas_tech.csv', low_memory=False)
-print("DataFrame de Vendas carregado:")
-print(df_vendas)
-
-# Leitura do arquivo Excel com a lista de gerentes e metas
 df_gerentes = pd.read_excel('gerentes_lojas.xlsx')
-print("\nDataFrame de Gerentes carregado:")
-print(df_gerentes)
 
-# ----------------------------
-# 2. INSPEÇÃO INICIAL DOS DADOS (Análise Exploratória)
-# ----------------------------
+print("Arquivos carregados:")
+print(f"Vendas: {df_vendas.shape[0]} linhas e {df_vendas.shape[1]} colunas")
+print(f"Gerentes: {df_gerentes.shape[0]} linhas e {df_gerentes.shape[1]} colunas")
 
-print("\n--- Inspeção Inicial ---")
-
-# Exibe as primeiras 15 linhas
+# %%
+# ====================================================================
+# BLOCO 3 - INSPEÇÃO INICIAL DOS DADOS (ANÁLISE EXPLORATÓRIA - EDA)
+# ====================================================================
+# Objetivo: "Conhecer" os dados antes de mexer.
+# head() -> primeiras linhas | tail() -> últimas | sample() -> aleatórias
+# shape -> dimensões | columns -> nomes das colunas
+# info() -> tipos e contagem de não-nulos | describe() -> estatísticas
+# ====================================================================
+print("\n--- VISUALIZAÇÃO GERAL ---")
 print("Primeiras 15 linhas:")
 print(df_vendas.head(15))
 
-# Exibe as últimas 15 linhas
 print("\nÚltimas 15 linhas:")
 print(df_vendas.tail(15))
 
-# Exibe 15 linhas de forma aleatória (amostra)
-print("\nAmostra de 15 linhas aleatórias:")
+print("\nAmostra aleatória de 15 linhas:")
 print(df_vendas.sample(15))
 
-# Mostra quantas linhas e colunas o DataFrame possui (formato: (linhas, colunas))
-print("\nDimensões do DataFrame (linhas, colunas):")
-print(df_vendas.shape)
+print(f"\nDimensões do DataFrame (linhas, colunas): {df_vendas.shape}")
 
-# Lista todas as colunas existentes
-print("\nNomes das colunas:")
-print(df_vendas.columns)
+print("\nNomes de todas as colunas:")
+print(df_vendas.columns.tolist())
 
-# Resumo geral: tipos de dados (dtypes), memória, contagem de não-nulos, etc.
-print("\nResumo das informações do DataFrame (info):")
+print("\nResumo dos tipos de dados (info):")
 print(df_vendas.info())
 
-# Estatísticas descritivas: média, desvio padrão, quartis, máximo, mínimo, contagem
 print("\nEstatísticas descritivas (describe):")
 print(df_vendas.describe())
 
-# ----------------------------
-# 3. TRATAMENTO E LIMPEZA DOS DADOS
-# ----------------------------
-
-print("\n--- Iniciando Limpeza e Tratamento ---")
-
-# Visualizando colunas específicas para conferência
-print("Colunas 'Loja' e 'Cliente' (primeiras 5):")
-print(df_vendas[['Loja', 'Cliente']].head())
-
-# Cria uma cópia do DataFrame para trabalharmos sem perder o original
+# %%
+# ====================================================================
+# BLOCO 4 - TRATAMENTO INICIAL E LIMPEZA (NULOS E TIPOS)
+# ====================================================================
+# 1. Criamos uma CÓPIA do df_vendas para não perder o original.
+# 2. Removemos a coluna 'Data_Base' (inútil, só tem 1 dado preenchido).
+# 3. Preenchemos os valores vazios (NaN) da coluna 'Loja' com "Online".
+# 4. Convertemos a coluna 'Data' para o tipo DATETIME (data/hora).
+# ====================================================================
 df_analise = df_vendas.copy()
 
-# Exclui a coluna 'Data_Base', pois ela possui apenas 1 linha preenchida (dados inúteis para a análise)
+# Excluindo a coluna inútil
 df_analise = df_analise.drop(columns=['Data_Base'])
 
-# Tratamento de valores nulos (NaN)
-# Preenche os valores vazios da coluna 'Loja' com a string "Online"
-# (Isso indica que, se a loja não foi informada, a venda foi feita pelo canal online)
+# Substituindo NaN por "Online" na coluna Loja
 df_analise['Loja'] = df_analise['Loja'].fillna('Online')
 
-# Conversão do tipo da coluna 'Data' para datetime
-# O formato esperado é 'YYYY-MM-DD' (ex: 2026-12-31)
+# Convertendo a coluna de Data para o formato datetime (YYYY-MM-DD)
 df_analise['Data'] = pd.to_datetime(df_analise['Data'], format='%Y-%m-%d')
 
-# ----------------------------
-# 4. PADRONIZAÇÃO DE TEXTOS (STRINGS)
-# ----------------------------
+print("Coluna 'Data_Base' removida, nulos tratados e 'Data' convertida.")
+print(df_analise[['Loja', 'Data']].head())
 
-# Remove espaços em branco das laterais (strip)
+# %%
+# ====================================================================
+# BLOCO 5 - PADRONIZAÇÃO DE TEXTOS (STRINGS)
+# ====================================================================
+# Dados vêm bagunçados: "Sao Paulo ", "sao paulo", "SP".
+# strip() -> remove espaços sobrando nas laterais.
+# title() -> deixa a primeira letra de cada palavra Maiúscula.
+# Ex: "sao paulo " vira "Sao Paulo".
+# ====================================================================
 df_analise['Loja'] = df_analise['Loja'].str.strip()
-
-# Converte a primeira letra de cada palavra para maiúscula (title) 
-# Exemplo: "sao paulo" -> "Sao Paulo", "SP" -> "Sp" (cuidado: "SP" vira "Sp", mas mantemos)
 df_analise['Loja'] = df_analise['Loja'].str.title()
 
-# ----------------------------
-# 5. TRATAMENTO DA BASE DE GERENTES (Para não poluir a base de vendas)
-# ----------------------------
+print("Textos da coluna 'Loja' padronizados.")
+print("Lojas únicas agora:", df_analise['Loja'].unique())
 
-# Aplicamos a MESMA padronização na coluna 'Loja' do DataFrame de gerentes
-# (Isso é essencial para conseguirmos fazer o merge/junção corretamente depois)
+# %%
+# ====================================================================
+# BLOCO 6 - TRATAMENTO DA TABELA DE GERENTES (PADRONIZAÇÃO)
+# ====================================================================
+# Atenção: Não podemos mexer na coluna 'Loja' do df_analise usando a 
+# lista de gerentes. Cada tabela tem suas próprias linhas.
+# Aqui padronizamos APENAS o df_gerentes para depois conseguir juntar (merge).
+# ====================================================================
 df_gerentes['Loja'] = df_gerentes['Loja'].str.strip()
 df_gerentes['Loja'] = df_gerentes['Loja'].str.title()
 
-# ----------------------------
-# 6. REMOÇÃO DE DUPLICATAS
-# ----------------------------
+print("Coluna 'Loja' na tabela de Gerentes padronizada.")
+print(df_gerentes.head())
 
-# Remove linhas duplicadas baseadas na coluna 'ID_Pedido' (mantém apenas a primeira ocorrência)
+# %%
+# ====================================================================
+# BLOCO 7 - REMOÇÃO DE LINHAS DUPLICADAS
+# ====================================================================
+# Se o mesmo 'ID_Pedido' aparece duas vezes, mantemos apenas o primeiro.
+# Isso evita distorções nas contas de faturamento.
+# ====================================================================
 df_analise = df_analise.drop_duplicates(subset=['ID_Pedido'])
 
-# Exibe um resumo do DataFrame após as limpezas
-print("\nResumo do DataFrame após limpeza (info):")
-print(df_analise.info())
+print(f"Linhas restantes após remover duplicatas: {df_analise.shape[0]}")
 
-# ----------------------------
-# 7. CRIAÇÃO DE NOVAS COLUNAS (FEATURE ENGINEERING)
-# ----------------------------
-
-print("\n--- Criando Novas Colunas ---")
-
-# Cria a coluna 'Faturamento' (Quantidade * Preço Unitário)
+# %%
+# ====================================================================
+# BLOCO 8 - CRIAÇÃO DE NOVAS COLUNAS (FEATURE ENGINEERING)
+# ====================================================================
+# 1. Faturamento = Quantidade * Preço Unitário (Total da venda).
+# 2. Forma de Venda: Se Loja == "Online" -> "Online", senão "Presencial".
+# ====================================================================
 df_analise['Faturamento'] = df_analise['Qtd'] * df_analise['Preco_Unitario']
 
-# Cria a coluna 'Forma_de_Venda' baseada na coluna 'Loja'
-# Se a Loja for "Online", a Forma de Venda é "Online". Caso contrário, é "Presencial".
-df_analise['Forma_de_Venda'] = np.where(df_analise['Loja'] == 'Online', 'Online', 'Presencial')
+df_analise['Forma_de_Venda'] = np.where(
+    df_analise['Loja'] == 'Online', 
+    'Online', 
+    'Presencial'
+)
 
-# ----------------------------
-# 8. MAPEAMENTO DE REGIÕES (Dicionário)
-# ----------------------------
+print("Colunas 'Faturamento' e 'Forma_de_Venda' criadas.")
+print(df_analise[['Qtd', 'Preco_Unitario', 'Faturamento', 'Forma_de_Venda']].head())
 
-# Exibe as lojas únicas para conferência
-print("\nLojas únicas disponíveis no DataFrame:")
-print(df_analise['Loja'].unique())
-
-# Dicionário que mapeia cada Loja para sua respectiva Região (funciona como um "tradutor")
+# %%
+# ====================================================================
+# BLOCO 9 - MAPEAMENTO DE REGIÕES (DICIONÁRIO)
+# ====================================================================
+# Criamos um dicionário que funciona como um "tradutor".
+# Se na coluna 'Loja' aparecer 'Sao Paulo', o map() coloca 'Sudeste'.
+# ====================================================================
 dic_regioes = {
     'Sao Paulo': 'Sudeste',
     'Belo Horizonte': 'Sudeste',
@@ -144,133 +161,143 @@ dic_regioes = {
     'Porto Alegre': 'Sul'
 }
 
-# Aplica o dicionário à coluna 'Loja' para criar a nova coluna 'Regiao'
 df_analise['Regiao'] = df_analise['Loja'].map(dic_regioes)
 
-# Verifica se há valores nulos na nova coluna 'Regiao'
-print("\nQuantidade de valores nulos por coluna (após adicionar 'Regiao'):")
-print(df_analise.isna().sum())
+print("Coluna 'Regiao' adicionada.")
+print("Verificando se há nulos na nova coluna:")
+print(df_analise['Regiao'].isna().sum())
 
-# ----------------------------
-# 9. ORDENAÇÃO E REINDEXAÇÃO
-# ----------------------------
-
-# Ordena o DataFrame pela 'Data' e depois pelo 'Faturamento'
+# %%
+# ====================================================================
+# BLOCO 10 - ORDENAÇÃO E REINDEXAÇÃO
+# ====================================================================
+# sort_values -> ordena primeiro por 'Data' (mais antiga) e depois por 'Faturamento'.
+# reset_index(drop=True) -> renumerar os índices de 0 até o fim, sem criar coluna extra.
+# ====================================================================
 df_analise = df_analise.sort_values(by=['Data', 'Faturamento'])
-
-# Reinicia os índices para ficarem sequenciais (0, 1, 2, ...)
 df_analise = df_analise.reset_index(drop=True)
 
-# ----------------------------
-# 10. FILTRAGEM E CONSULTAS ESPECÍFICAS (.loc e .iloc)
-# ----------------------------
+print("DataFrame ordenado e índices resetados.")
 
-print("\n--- Exemplos de Filtros e Consultas ---")
-
-# Usando .loc para buscar dados baseados no ID do Pedido (filtro por condição)
+# %%
+# ====================================================================
+# BLOCO 11 - FILTROS E CONSULTAS (.loc e .iloc)
+# ====================================================================
+# .loc -> busca por NOME da linha (condição) e NOME da coluna.
+# .iloc -> busca por POSIÇÃO (número da linha e número da coluna).
+# ====================================================================
 id_pedido = 4
 loja = df_analise.loc[df_analise['ID_Pedido'] == id_pedido, 'Loja'].values[0]
 produto = df_analise.loc[df_analise['ID_Pedido'] == id_pedido, 'Produto'].values[0]
-cliente = df_analise.loc[df_analise['ID_Pedido'] == id_pedido, 'Cliente'].values[0]
-print(f"ID_Pedido {id_pedido} -> Loja: {loja}, Produto: {produto}, Cliente: {cliente}")
+print(f"ID {id_pedido}: Loja={loja}, Produto={produto}")
 
-# Usando .iloc para buscar pela posição (linha 3, coluna 2 - lembrando que índices começam em 0)
-# Neste caso, buscamos o valor na 4ª linha e 3ª coluna (posição)
-print("\nBuscando valores com .iloc (posição 3, 2):")
-print(f"Valor na linha 3, coluna 2: {df_analise.iloc[3, 2]}")
+# Exemplo de .iloc (linha 3, coluna 2 -> lembrando que começa do 0)
+print(f"Valor na posição [3, 2]: {df_analise.iloc[3, 2]}")
 
-# ----------------------------
-# 11. EXPORTAÇÃO DE DATAFRAMES FILTRADOS
-# ----------------------------
-
-# Filtra apenas as vendas da loja 'Sao Paulo' e exporta para CSV
+# %%
+# ====================================================================
+# BLOCO 12 - EXPORTAÇÃO DE DATAFRAMES FILTRADOS (CSV)
+# ====================================================================
+# Salvamos pedaços do DataFrame em arquivos .csv separados.
+# Isso é útil para entregar relatórios parciais.
+# ====================================================================
+# Vendas apenas da loja São Paulo
 df_vendas_sp = df_analise[df_analise['Loja'] == 'Sao Paulo']
 df_vendas_sp.to_csv('Vendas_SP.csv', index=False)
-print("\nArquivo 'Vendas_SP.csv' exportado com sucesso!")
+print("Arquivo 'Vendas_SP.csv' salvo!")
 
-# Filtra as vendas apenas do ano de 2024 (ano inteiro)
+# Vendas apenas do ano de 2024
 df_vendas_2024 = df_analise[df_analise['Data'].dt.year == 2024]
-print(f"\nVendas de 2024: {df_vendas_2024.shape[0]} linhas encontradas.")
+print(f"Total de vendas em 2024: {df_vendas_2024.shape[0]} linhas.")
 
-# ----------------------------
-# 12. FILTROS COM DUPLAS CONDIÇÕES
-# ----------------------------
-
-# Exemplo: Vendas de 'Cabo HDMI' na região 'Sul'
-df_vendas_hdmi_sul = df_analise[
+# %%
+# ====================================================================
+# BLOCO 13 - FILTROS COM DUPLAS CONDIÇÕES
+# ====================================================================
+# Uso de & (E) para unir duas condições.
+# Exemplo: Produto é 'Cabo HDMI' E Regiao é 'Sul'.
+# ====================================================================
+df_hdmi_sul = df_analise[
     (df_analise['Produto'] == 'Cabo HDMI') & (df_analise['Regiao'] == 'Sul')
 ]
-print(f"\nVendas de Cabo HDMI na Região Sul: {df_vendas_hdmi_sul.shape[0]} linhas.")
+print(f"Vendas de Cabo HDMI na Região Sul: {df_hdmi_sul.shape[0]} registros.")
 
-# ----------------------------
-# 13. ANÁLISES POR AGRUPAMENTO (GROUPBY)
-# ----------------------------
+# %%
+# ====================================================================
+# BLOCO 14 - ANÁLISES POR AGRUPAMENTO (GROUPBY) - RANKINGS
+# ====================================================================
+# groupby -> junta os dados por categoria e aplica uma função (sum, mean, etc).
+# 1. Ranking de Faturamento por Loja.
+# 2. Ranking de Produtos mais vendidos no Online.
+# ====================================================================
+# Ranking 1: Lojas que mais faturaram
+rank_lojas = df_analise[['Loja', 'Faturamento']].groupby('Loja').sum()
+rank_lojas = rank_lojas.sort_values(by='Faturamento', ascending=False)
+rank_lojas = rank_lojas.reset_index()
+rank_lojas['Faturamento'] = rank_lojas['Faturamento'].map('R${:,.2f}'.format)
+print("\n--- RANKING DE FATURAMENTO POR LOJA ---")
+print(rank_lojas)
 
-print("\n--- Análises de Agrupamento (Rankings) ---")
+# Ranking 2: Produtos mais vendidos (em quantidade) no canal Online
+df_online = df_analise[df_analise['Loja'] == 'Online']
+rank_prod_online = df_online[['Produto', 'Qtd']].groupby('Produto').sum()
+rank_prod_online = rank_prod_online.rename(columns={'Qtd': 'Vendas Totais'})
+rank_prod_online = rank_prod_online.sort_values(by='Vendas Totais', ascending=False)
+print("\n--- RANKING DE PRODUTOS ONLINE (por Quantidade) ---")
+print(rank_prod_online.head())
 
-# RANK 1: Faturamento total por Loja
-analise_lojas = df_analise[['Loja', 'Faturamento']].groupby('Loja').sum()
-analise_lojas = analise_lojas.sort_values(by='Faturamento', ascending=False)
-analise_lojas = analise_lojas.reset_index()
-# Formata a coluna 'Faturamento' para o padrão de moeda brasileira (R$)
-analise_lojas['Faturamento'] = analise_lojas['Faturamento'].map('R${:,.2f}'.format)
-print("\nRanking de Faturamento por Loja (do maior para o menor):")
-print(analise_lojas)
-
-# RANK 2: Produtos que mais venderam no canal Online (com base na quantidade)
-df_analise_online = df_analise[df_analise['Loja'] == 'Online']
-analise_produtos_online = df_analise_online[['Produto', 'Qtd']].groupby('Produto').sum()
-analise_produtos_online = analise_produtos_online.rename(columns={'Qtd': 'Vendas Totais'})
-print("\nRanking de Produtos mais vendidos no canal Online (por quantidade):")
-print(analise_produtos_online.sort_values(by='Vendas Totais', ascending=False))
-
-# RANK 3: Quais produtos venderam mais em CADA loja (agrupamento duplo)
-df_produtos_em_lojas = df_analise[['Loja', 'Produto', 'Qtd']].groupby(['Loja', 'Produto']).sum()
-print("\nVendas por Produto em cada Loja (amostra):")
-print(df_produtos_em_lojas.head(10))
-
-# ----------------------------
-# 14. ANÁLISE DE META DOS GERENTES (JANEIRO/2023)
-# ----------------------------
-
-print("\n--- Análise de Metas dos Gerentes (Jan/2023) ---")
-
-# Filtra os dados para Janeiro de 2023
+# %%
+# ====================================================================
+# BLOCO 15 - ANÁLISE DE METAS DOS GERENTES (MERGE + JANEIRO/2023)
+# ====================================================================
+# 1. Filtramos os dados para Janeiro de 2023.
+# 2. Agrupamos o faturamento por Loja.
+# 3. Damos um merge (junção) com a tabela df_gerentes para puxar a Meta.
+# 4. Comparamos se o faturamento >= Meta -> "Sim", senão "Não".
+# ====================================================================
 df_meta = df_analise[
     (df_analise['Data'].dt.year == 2023) & (df_analise['Data'].dt.month == 1)
 ]
-
-# Agrupa o faturamento por Loja para o período filtrado
 df_meta = df_meta[['Loja', 'Faturamento']].groupby('Loja', as_index=False).sum()
-
-# Junta (merge) com a tabela de gerentes para trazer a coluna 'Meta_Mensal'
 df_meta = df_meta.merge(df_gerentes, on='Loja', how='left')
+df_meta['Bateu a Meta?'] = np.where(
+    df_meta['Faturamento'] >= df_meta['Meta_Mensal'], 
+    'Sim', 
+    'Não'
+)
 
-# Cria uma coluna indicando se o gerente bateu a meta ou não
-df_meta['Bateu a Meta?'] = np.where(df_meta['Faturamento'] >= df_meta['Meta_Mensal'], 'Sim', 'Não')
-
-print("Resultado de Metas para Janeiro/2023:")
+print("\n--- RESULTADO DAS METAS - JANEIRO/2023 ---")
 print(df_meta)
 
-# ----------------------------
-# 15. ANÁLISE TEMPORAL E VISUALIZAÇÃO (PLOT)
-# ----------------------------
-
-print("\n--- Análise Temporal ---")
-
-# Cria uma coluna com o mês/ano no formato 'YYYY-MM' (ex: 2023-01)
+# %%
+# ====================================================================
+# BLOCO 16 - ANÁLISE TEMPORAL E VISUALIZAÇÃO (GRÁFICO)
+# ====================================================================
+# 1. Criamos uma coluna 'Mes-Ano' (ex: 2023-01).
+# 2. Agrupamos o Faturamento total por mês.
+# 3. Plotamos um gráfico de linha para ver a evolução.
+# ====================================================================
 df_analise['Mes-Ano'] = df_analise['Data'].dt.to_period("M")
-
-# Agrupa o faturamento por mês/ano
 df_vendas_mes = df_analise[['Mes-Ano', 'Faturamento']].groupby('Mes-Ano').sum()
 
-# Gera um gráfico de linha (evolução do faturamento ao longo do tempo)
-# (Se estiver no Jupyter/Colab, o gráfico será exibido automaticamente. 
-#  Se estiver rodando como script .py, ele abrirá uma janela com o gráfico)
+# O comando abaixo gera o gráfico. 
+# Se estiver no VS Code com Python, ele vai abrir uma janela.
+# Se estiver no Colab/Jupyter, vai aparecer abaixo da célula.
 df_vendas_mes.plot(title="Evolução do Faturamento Mensal", ylabel="Faturamento (R$)")
 
-# Exibe o DataFrame final para conferência
-print("\nDataFrame final tratado e enriquecido (primeiras 5 linhas):")
+print("\nGráfico de evolução mensal gerado com sucesso!")
+
+# %%
+# ====================================================================
+# BLOCO 17 - VISUALIZAÇÃO FINAL DO DATAFRAME TRATADO
+# ====================================================================
+print("\n--- DATAFRAME FINAL (LIMPO E TRATADO) ---")
+print("Primeiras 5 linhas:")
 print(df_analise.head())
 
-print("\n--- Fim do Script ---")
+print("\nÚltimas 5 linhas:")
+print(df_analise.tail())
+
+print("\n" + "="*70)
+print("✅ PROJETO FINALIZADO COM SUCESSO! TODOS OS BLOCOS FORAM EXECUTADOS.")
+print("="*70)
