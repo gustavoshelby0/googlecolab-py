@@ -1,1 +1,393 @@
-tg
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyN55atZnhIZpJao4k5CXYeW",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/gustavoshelby0/googlecolab-py/blob/main/Hashtag_Python_Data_Analitcs.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "P7swxvdDtkak"
+      },
+      "outputs": [],
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_vendas = pd.read_csv('vendas_tech.csv', low_memory=False)\n",
+        "print(df_vendas)\n",
+        "df_gerentes = pd.read_excel('gerentes_lojas.xlsx')\n",
+        "print(df_gerentes)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "3HdXaJaZt7ft"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# inspeção dos dados\n",
+        "\n",
+        "print(df_vendas)\n",
+        "\n",
+        "# me mostre as primeiras 15 linhas do df\n",
+        "print(df_vendas.head(15))\n",
+        "\n",
+        "# me mostre as últimas 15 linhas do df\n",
+        "print(df_vendas.tail(15))\n",
+        "\n",
+        "# me mostre 15 linhas de forma aleatória do df\n",
+        "print(df_vendas.sample(15))\n",
+        "\n",
+        "# me mostre quantas linhas e colunas o df tem, no formato 100000,8\n",
+        "print(df_vendas.shape)\n",
+        "\n",
+        "# me mostre quais colunas existem no meu df\n",
+        "print(df_vendas.columns)\n",
+        "\n",
+        "# me mostre um resumo do df. quais são os tipos das colunas, são str, float, int, memory usage, index, ...\n",
+        "print(df_vendas.info())\n",
+        "\n",
+        "# me mostre a mean, std, quartis, max, min, count\n",
+        "print(df_vendas.describe())\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "QDMdTqYDt7dI"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# tratamento de dados\n",
+        "print(df_vendas['Loja'])\n",
+        "print(df_vendas[['Loja', 'Cliente']])\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# colunas\n",
+        "\n",
+        "# exclua a coluna do df chamada 'Data_Base' (ela só tem 1 linha preenchida, por isso vai ser excluída)\n",
+        "df_analise = df_vendas.drop(columns=['Data_Base'])\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# nulos\n",
+        "\n",
+        "#df_analise = df_analise.dropna() # excluir todas as linhas que têm pelo menos 1 valor vazio\n",
+        "\n",
+        "# Preenche os valores NaN com \"Online\". A função fillna() substitui os valores ausentes (NaN). Neste caso, o programador decidiu considerar que toda loja sem informação será identificada como \"Online\".\n",
+        "\n",
+        "df_analise['Loja'] = df_analise['Loja'].fillna('Online')\n",
+        "\n",
+        "\n",
+        "\n",
+        "# tipos de dados\n",
+        "\n",
+        "# coloque o dtype da coluna 'Data' do df do tipo str que está atualmente para datetime. e formate a data nesse estilo '%Y-%m-%d' = 2026-12-31\n",
+        "df_analise['Data'] = pd.to_datetime(df_analise['Data'], format='%Y-%m-%d')\n",
+        "\n",
+        "\n",
+        "\n",
+        "# padronização da escrita ex (SP) (Sp) (sp)\n",
+        "\n",
+        "# padronize a coluna 'Loja' do df. tirando os espaços em branco das laterais do texto ex( Sao Paulo ) = (Sao Paulo)\n",
+        "df_analise['Loja'] = df_analise['Loja'].str.strip()\n",
+        "# padronize a coluna 'Loja' do df. colocando a primeira palavra em maiúsculo ex (sao paulo) or (SAO PAULO) = (Sao Paulo)\n",
+        "df_analise['Loja'] = df_analise['Loja'].str.title()\n",
+        "\n",
+        "# As linhas abaixo foram removidas porque sobrescreviam a coluna 'Loja' com os dados de df_gerentes, causando erro lógico\n",
+        "# df_analise['Loja'] = df_gerentes['Loja'].str.strip()\n",
+        "# df_analise['Loja'] = df_gerentes['Loja'].str.title()\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# duplicatas\n",
+        "\n",
+        "# tire todas as linhas duplicadas, onde o id_pedido se repete\n",
+        "df_analise = df_analise.drop_duplicates(subset=['ID_Pedido'])\n",
+        "\n",
+        "\n",
+        "# # me mostre um novo resumo do df. quais são os tipos das colunas, são str, float, int, memory usage, index, ...\n",
+        "print(df_analise)\n",
+        "print(df_analise.info())\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "sWQ6226St7aO"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# análise de dados\n",
+        "\n",
+        "\n",
+        "\n",
+        "# criar novas colunas\n",
+        "# crie uma coluna no df. com base nas colunas do df (Qtd) & (Preco_Unitario) faça uma multiplicação entre os 2, e coloque isso na variável chamada 'Faturamento'\n",
+        "df_analise['Faturamento'] = df_analise['Qtd'] * df_analise['Preco_Unitario']\n",
+        "\n",
+        "\n",
+        "# forma de venda\n",
+        "# crie uma coluna nova no df. com base em um filtro em cima de uma coluna já existente no df chamada 'Loja'. para criar o filtro o programador usa o where. dentro da coluna 'Loja' caso exista 'Online' escreva na mesma linha, só que agora na nova coluna chamada 'Forma_de_Pagamento' o nome 'Online'. caso exista 'Rio de Janeiro','Sao Paulo','Curitiba'... escreva na forma de pagamento o nome 'Presencial', para o programador entender se a forma de pagamento foi online ou presencial dependendo se a compra foi online ou presencial\n",
+        "df_analise['Forma_de_Venda'] = np.where(df_analise['Loja'] == 'Online', 'Online', 'Presencial')\n",
+        "\n",
+        "\n",
+        "\n",
+        "# região\n",
+        "\n",
+        "# me mostre a coluna 'Loja' do df. mas quero apenas os valores únicos, nesse caso: apenas as lojas únicas ex ('Rio de Janeiro','Sao Paulo','Curitiba')...\n",
+        "print(df_analise['Loja'].unique())\n",
+        "\n",
+        "# aqui ele fez um dicionário, estilo o aurélio. quero pesquisar como se chama maçã em inglês. vou no aurélio e busco o que corresponde a maçã em inglês, e recebo como retorno apple. aqui é simplesmente isso, observe que ele colocou o estado e a região dele, para quando o python procurar por são paulo esse código vai retornar para o python que a região é sudeste\n",
+        "dic_regioes = {'Sao Paulo':'Sudeste','Belo Horizonte':'Sudeste','Online':'Online','Rio de Janeiro':'Sudeste','Salvador':'Nordeste','Recife':'Nordeste','Curitiba':'Sul','Porto Alegre':'Sul'}\n",
+        "\n",
+        "# estou criando uma coluna chamada 'Regiao' no df. o python vai receber a coluna 'Loja' e com isso, o python vai requisitar o código python (dic_regioes) que funciona como um aurélio para o python nesse caso, assim o programador ajudou a explicar o que o python precisa mapear do dicionário que entreguei. e compara-lo com o df. e assim ele vai ver o que bate nas informações (aqui eu entreguei 'Sao Paulo') e na coluna 'Loja' do df também tem essa linha, então o python vai entender o que vai colocar na nova coluna 'Regiao' com base no dicionário, ali eu mandei que para {'Sao Paulo':'Sudeste'} e o que vai aparecer na região da nova coluna é o sudeste como pedi ao python\n",
+        "df_analise['Regiao'] = df_analise['Loja'].map(dic_regioes)\n",
+        "\n",
+        "# me mostre as atualizações do df. agora com a coluna região adicionada\n",
+        "print(df_analise)\n",
+        "\n",
+        "# conte todos os nulos de todas as colunas do meu df. quero saber se após essa adição da coluna 'Regiao' o df ficou corrompido\n",
+        "print(df_analise.isna().sum())\n"
+      ],
+      "metadata": {
+        "id": "kElRC5tnt7XY"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# analisar -> filtrar\n",
+        "\n",
+        "df_analise = df_analise.sort_values(by=['Data', 'Faturamento'])\n",
+        "df_analise = df_analise.reset_index(drop=True)\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# .iloc: id do pedido -> por nome da coluna e por nome da linha]\n",
+        "\n",
+        "id_pedido = 4\n",
+        "loja = df_analise.loc[df_analise['ID_Pedido'] == 4, 'Loja']\n",
+        "produto = df_analise.loc[df_analise['ID_Pedido'] == 4, 'Produto']\n",
+        "cliente = df_analise.loc[df_analise['ID_Pedido'] == 4, 'Cliente']\n",
+        "print(loja, produto, cliente)\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# .loc -> por posição\n",
+        "\n",
+        "id_pedido = 4\n",
+        "loja = df_analise.iloc[3, df_analise.columns.get_loc('Loja')]\n",
+        "produto = df_analise.iloc[3, df_analise.columns.get_loc('Produto')]\n",
+        "cliente = df_analise.iloc[3, df_analise.columns.get_loc('Cliente')]\n",
+        "print(loja, produto, cliente)\n",
+        "\n",
+        "\n",
+        "\n",
+        "# condicional\n",
+        "# df_id_pedido_4 = df_analise[df_analise['ID_Pedido'] == 4]\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# exportar pedaços do df\n",
+        "\n",
+        "df_vendas_sp = df_analise[df_analise['Loja'] == 'Sao Paulo']\n",
+        "df_vendas_sp.to_csv('Vendas_SP.csv', index=False)\n",
+        "\n",
+        "print(df_vendas_sp)\n",
+        "\n",
+        "\n",
+        "# exportar as vendas de 2024\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "df_vendas_2024 = df_analise[df_analise['Data'].dt.year == 2024]\n",
+        "\n",
+        "print(df_vendas_2024)\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# duplas condições\n",
+        "\n",
+        "\n",
+        "\n",
+        "# condicao1 = df_analise['Produto'] == 'Cabo HDMI'\n",
+        "# condicao2 = df_analise['Regiao'] == 'Sul'\n",
+        "# df_vendas_hdmi_sul = df_analise[condicao1 & condicao2]\n",
+        "\n",
+        "\n",
+        "\n",
+        "df_vendas_hdmi_sul = df_analise[(df_analise['Produto'] == 'Cabo HDMI') & (df_analise['Regiao'] == 'Sul')]\n",
+        "\n",
+        "print(df_vendas_hdmi_sul)"
+      ],
+      "metadata": {
+        "id": "17OrLe8PHwWQ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# análises por agrupamento\n",
+        "# print(df_analise)\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# rank de faturamento por loja\n",
+        "\n",
+        "analise_lojas = df_analise[['Loja', 'Faturamento']].groupby('Loja').sum()\n",
+        "\n",
+        "analise_lojas = analise_lojas.sort_values(by='Faturamento', ascending=False)\n",
+        "\n",
+        "analise_lojas = analise_lojas.reset_index()\n",
+        "\n",
+        "analise_lojas['Faturamento'] = analise_lojas['Faturamento'].map(lambda x: f'R${x:,.2f}')\n",
+        "\n",
+        "print(analise_lojas)\n",
+        "\n",
+        "\n",
+        "# rank produtos que mais venderam Online\n",
+        "\n",
+        "df_analise_online = df_analise[df_analise['Loja'] == 'Online']\n",
+        "analise_produtos_online = df_analise_online[['Produto', 'Qtd']].groupby('Produto').sum()\n",
+        "\n",
+        "analise_produtos_online = analise_produtos_online.rename(columns={'Qtd': 'Vendas Totais'})\n",
+        "\n",
+        "print(analise_produtos_online)\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "# análise de ranking por loja e por produto\n",
+        "# quais produtos venderam mais em cada uma das lojas\n",
+        "\n",
+        "\n",
+        "\n",
+        "df_produtos_em_lojas = df_analise[['Loja', 'Produto', 'Qtd']].groupby(['Loja', 'Produto']).sum()\n",
+        "print(df_produtos_em_lojas)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "c8IVEoxwHwTY"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# quais gerentes bateram a meta em jan de 2023\n",
+        "\n",
+        "df_meta = df_analise[(df_analise['Data'].dt.year == 2023) & (df_analise['Data'].dt.month == 1)]\n",
+        "print(df_meta)\n",
+        "\n",
+        "\n",
+        "df_meta = df_meta[['Loja', 'Faturamento']].groupby('Loja', as_index=False).sum()\n",
+        "df_meta = df_meta.merge(df_gerentes, on='Loja', how='left')\n",
+        "df_meta['Bateu Meta'] = np.where(df_meta['Faturamento'] >= df_meta['Meta_Mensal'], 'Sim', 'Nao')\n"
+      ],
+      "metadata": {
+        "id": "JiTnqPcjHwQf"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "\n",
+        "df_analise['Mes-Ano'] = df_analise['Data'].dt.to_period(\"M\")\n",
+        "df_vendas_mes = df_analise[['Mes-Ano', 'Faturamento']].groupby('Mes-Ano').sum()\n",
+        "df_vendas_mes.plot()\n",
+        "\n",
+        "print(df_analise)"
+      ],
+      "metadata": {
+        "id": "ORQ8R1DvHwN1"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "MZ9qIn15t7U6"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
